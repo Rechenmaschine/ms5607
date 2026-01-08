@@ -1,5 +1,9 @@
 # ms5607 device driver
 
+[![CI](https://github.com/Rechenmaschine/ms5607/actions/workflows/rust.yml/badge.svg?branch=main)](https://github.com/Rechenmaschine/ms5607/actions/workflows/rust.yml)
+[![Docs.rs](https://img.shields.io/docsrs/ms5607?logo=rust)](https://docs.rs/ms5607)
+[![Crates.io](https://img.shields.io/crates/v/ms5607.svg)](https://crates.io/crates/ms5607)
+
 `no_std` driver for the TE Connectivity MS5607 barometric pressure sensor. Supports both async and blocking operation using the `embedded-hal` traits.
 
 Datasheet: <https://www.amsys-sensor.com/downloads/data/MS5607-02BA03-AMSYS-datasheet.pdf>
