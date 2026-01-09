@@ -1,6 +1,6 @@
 [package]
 name = "ms5637-rs"
-version = "0.1.0"
+version = "0.1.1"
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
@@ -15,7 +15,7 @@ readme = "README.md"
 include = ["src/**", "README.md", "../LICENSE*", "Cargo.toml"]
 
 [dependencies]
-ms56xx = { path = "../ms56xx", version = "0.1.0" }
+ms56xx = { path = "../ms56xx", version = "0.1.1" }
 embedded-hal.workspace = true
 embedded-hal-async.workspace = true
 

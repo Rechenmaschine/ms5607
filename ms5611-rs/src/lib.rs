@@ -1,9 +1,11 @@
 #![no_std]
 #![doc = include_str!("../README.md")]
 
-pub use ms56xx::{Error, Measurement, OversamplingStandard as Oversampling};
+pub use ms56xx::{
+    Error, I2cInterface, Measurement, OversamplingStandard as Oversampling, SpiInterface,
+};
 
-use ms56xx::{I2cInterface, Ms56xx, Ms5611 as Ms5611Variant, SpiInterface};
+use ms56xx::{Ms56xx, Ms5611 as Ms5611Variant};
 
 /// MS5611 sensor driver.
 ///
@@ -22,6 +24,17 @@ impl<I2C> Ms5611<I2cInterface<I2C>> {
     pub fn new_i2c(i2c: I2C, csb_high: bool) -> Self {
         Self {
             inner: Ms56xx::new_i2c(i2c, csb_high),
+        }
+    }
+
+    /// Create a new MS5611 sensor driver using I2C with an explicit address.
+    ///
+    /// This allows you to specify the exact I2C address (typically 0x76 or 0x77).
+    ///
+    /// Note: You must call [`Self::init`] or [`Self::init_blocking`] before measurements.
+    pub fn new_i2c_with_address(i2c: I2C, address: u8) -> Self {
+        Self {
+            inner: Ms56xx::new_i2c_with_address(i2c, address),
         }
     }
 

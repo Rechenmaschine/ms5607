@@ -156,6 +156,16 @@ impl<I2C, VARIANT: SensorVariant> Ms56xx<I2cInterface<I2C>, VARIANT> {
         }
     }
 
+    /// Create a new sensor driver using I2C with an explicit address.
+    pub fn new_i2c_with_address(i2c: I2C, address: u8) -> Self {
+        Self {
+            interface: I2cInterface::new(i2c, address),
+            prom: [0; 8],
+            initialized: false,
+            _variant: PhantomData,
+        }
+    }
+
     /// Release the underlying I2C bus.
     pub fn destroy(self) -> I2C {
         self.interface.destroy()
