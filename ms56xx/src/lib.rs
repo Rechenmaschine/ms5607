@@ -64,7 +64,7 @@ impl OversamplingType for OversamplingStandard {
     }
 
     fn delay_us(self) -> u32 {
-        // Conservative delays (µs). If you want strict typ/max, model-specific OSR types are needed.
+        // Typical conversion times (µs) for MS5607/MS5611.
         match self {
             Self::Osr256 => 600,
             Self::Osr512 => 1170,
