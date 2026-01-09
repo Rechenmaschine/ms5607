@@ -1,7 +1,6 @@
 #![no_std]
 #![doc = include_str!("../README.md")]
 
-// Re-export the core types from ms56xx
 pub use ms56xx::{Error, Measurement, OversamplingStandard as Oversampling};
 
 use ms56xx::{I2cInterface, Ms56xx, Ms5607 as Ms5607Variant, SpiInterface};
