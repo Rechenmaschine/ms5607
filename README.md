@@ -10,7 +10,7 @@
 - Second-order temperature compensation
 - CRC validation of calibration data
 
-The MS56xx drivers are actively used in several projects at <https://github.com/aris-space> and deployed on flight hardware.
+The MS5607 driver is actively used in several projects at <https://github.com/aris-space> and deployed on flight hardware.
 
 ## Crates
 
@@ -24,7 +24,7 @@ The MS56xx drivers are actively used in several projects at <https://github.com/
 - **MS5611-01BA03** - Datasheet: <https://www.te.com/commerce/DocumentDelivery/DDEController?Action=showdoc&DocId=Data+Sheet%7FMS5611-01BA03%7FB3%7Fpdf%7FEnglish%7FENG_DS_MS5611-01BA03_B3.pdf>
 - **MS5637-02BA03** - I2C only, extended oversampling range (256-8192)
 
-All sensors use the same communication protocol but differ in their temperature compensation algorithms and features.
+All sensors use a similar communication protocol but differ in their temperature compensation algorithms and features.
 
 ## Usage Examples
 
