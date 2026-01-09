@@ -53,4 +53,3 @@ println!("Pressure: {} mbar, Temp: {} °C",
 ## License
 
 MIT or Apache-2.0 license, at your option.
-MIT or Apache-2.0 license, at your option.
