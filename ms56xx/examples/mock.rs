@@ -1,5 +1,5 @@
 use futures::executor::block_on;
-use ms5607::{Ms5607, Oversampling};
+use ms56xx::{Ms56xx, OversamplingStandard};
 
 fn main() {
     block_on(async_main());
@@ -8,9 +8,9 @@ fn main() {
 async fn async_main() {
     let i2c_interface = mock::MockI2c;
 
-    // The address of the MS5607 is determined by the CSB pin, but you can also specify it manually
-    let mut ms5607 = Ms5607::new(i2c_interface, true);
-    // let driver = Ms5607::new(i2c_interface, 0x76);
+    // The address of the MS5607 is determined by the CSB pin
+    // Type annotation needed to specify which sensor variant (Ms5607 or Ms5611)
+    let mut ms5607: Ms56xx<_, ms56xx::Ms5607> = Ms56xx::new_i2c(i2c_interface, true);
 
     // the delay type is usually supplied by your HAL or RTOS
     let mut delay = mock::Delay;
@@ -23,13 +23,13 @@ async fn async_main() {
 
     // Perform a measurement with the desired oversampling rate
     let _ = ms5607
-        .measure(Oversampling::Osr2048, &mut delay)
+        .measure(OversamplingStandard::Osr2048, &mut delay)
         .await
         .expect("Failed to perform async measurement");
 
     // We can also perform blocking measurements
     let meas = ms5607
-        .measure_blocking(Oversampling::Osr4096, &mut delay)
+        .measure_blocking(OversamplingStandard::Osr4096, &mut delay)
         .expect("Failed to perform blocking measurement");
 
     println!(

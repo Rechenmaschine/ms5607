@@ -1,32 +1,17 @@
-[package]
-name = "ms5607"
+[workspace]
+members = ["ms56xx", "ms5607", "ms5611", "ms5637"]
+resolver = "2"
+
+[workspace.package]
 version = "0.1.0"
 edition = "2024"
 authors = ["Louis Schell <louis.schell1@gmx.de>"]
-description = "Embedded hal driver for the TE MS5607 pressure sensor"
-documentation = "https://docs.rs/ms5607"
-keywords = ["embedded", "no-std", "embedded-hal", "sensor", "async"]
-categories = ["embedded", "no-std"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/Rechenmaschine/ms5607"
-readme = "README.md"
+keywords = ["embedded", "no-std", "embedded-hal", "sensor", "async"]
+categories = ["embedded", "no-std"]
 
-# Keep the published crate tidy.
-exclude = [".gitignore", ".pre-commit-config.yaml", "taplo.toml", "Cargo.lock", "Cargo.toml.orig"]
-
-[dependencies]
+[workspace.dependencies]
 embedded-hal-async = "1.0.0"
 embedded-hal = "1.0.0"
-# defmt is exposed as a feature
-defmt = { version = "1.0.1", optional = true }
-
-[features]
-defmt-03 = ["dep:defmt", "embedded-hal/defmt-03", "embedded-hal-async/defmt-03"]
-
-[dev-dependencies]
-futures = "0.3.31"
-
-[lib]
-test = true
-doctest = false
-bench = false
+defmt = "1.0.1"

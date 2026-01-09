@@ -1,0 +1,32 @@
+[package]
+name = "ms56xx"
+version = "0.1.0"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "no_std driver for MS56xx barometric pressure sensors (MS5607, MS5611)"
+documentation = "https://docs.rs/ms56xx"
+readme = "README.md"
+
+# Keep the published crate tidy
+include = ["src/**", "examples/**", "README.md", "../LICENSE*", "Cargo.toml"]
+
+[dependencies]
+embedded-hal-async.workspace = true
+embedded-hal.workspace = true
+# defmt is exposed as a feature
+defmt = { workspace = true, optional = true }
+
+[features]
+defmt-03 = ["dep:defmt", "embedded-hal/defmt-03", "embedded-hal-async/defmt-03"]
+
+[dev-dependencies]
+futures = "0.3.31"
+
+[lib]
+test = true
+doctest = false
+bench = false
