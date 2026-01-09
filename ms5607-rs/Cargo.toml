@@ -1,5 +1,5 @@
 [package]
-name = "ms5611"
+name = "ms5607-rs"
 version = "0.1.0"
 edition.workspace = true
 authors.workspace = true
@@ -7,8 +7,8 @@ license.workspace = true
 repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
-description = "no_std driver for the MS5611 barometric pressure sensor"
-documentation = "https://docs.rs/ms5611"
+description = "no_std driver for the MS5607 barometric pressure sensor"
+documentation = "https://docs.rs/ms5607-rs"
 readme = "README.md"
 
 # Keep the published crate tidy

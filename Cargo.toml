@@ -1,5 +1,5 @@
 [workspace]
-members = ["ms56xx", "ms5607", "ms5611", "ms5637"]
+members = ["ms56xx", "ms5607-rs", "ms5611-rs", "ms5637-rs"]
 resolver = "2"
 
 [workspace.package]
@@ -7,7 +7,7 @@ version = "0.1.0"
 edition = "2024"
 authors = ["Louis Schell <louis.schell1@gmx.de>"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/Rechenmaschine/ms5607"
+repository = "https://github.com/Rechenmaschine/ms56xx"
 keywords = ["embedded", "no-std", "embedded-hal", "sensor", "async"]
 categories = ["embedded", "no-std"]
 

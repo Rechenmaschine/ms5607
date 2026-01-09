@@ -5,8 +5,6 @@ pub use ms56xx::{Error, Measurement, OversamplingExtended as Oversampling};
 
 use ms56xx::{I2cInterface, Ms56xx, Ms5637 as Ms5637Variant};
 
-// Typestate markers for sensor variants
-
 /// MS5637 sensor driver.
 ///
 /// Generic over the interface type (I2C only - MS5637 doesn't support SPI).
@@ -20,7 +18,7 @@ impl<I2C> Ms5637<I2cInterface<I2C>> {
     ///
     /// The MS5637 has a fixed I2C address of 0x76.
     ///
-    /// Note: You must call [`init`](Self::init) or [`init_blocking`](Self::init_blocking) before measurements.
+    /// Note: You must call [`Self::init`] or [`Self::init_blocking`] before measurements.
     pub fn new_i2c(i2c: I2C) -> Self {
         Self {
             inner: Ms56xx::new_i2c(i2c, false), // csb_high doesn't matter for MS5637

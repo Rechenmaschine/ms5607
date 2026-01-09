@@ -3,22 +3,22 @@
 
 pub use ms56xx::{Error, Measurement, OversamplingStandard as Oversampling};
 
-use ms56xx::{I2cInterface, Ms56xx, Ms5607 as Ms5607Variant, SpiInterface};
+use ms56xx::{I2cInterface, Ms56xx, Ms5611 as Ms5611Variant, SpiInterface};
 
-/// MS5607 sensor driver.
+/// MS5611 sensor driver.
 ///
 /// Generic over the interface type (I2C or SPI).
-pub struct Ms5607<INTERFACE> {
-    inner: Ms56xx<INTERFACE, Ms5607Variant>,
+pub struct Ms5611<INTERFACE> {
+    inner: Ms56xx<INTERFACE, Ms5611Variant>,
 }
 
 // Constructors for I2C
-impl<I2C> Ms5607<I2cInterface<I2C>> {
-    /// Create a new MS5607 sensor driver using I2C with address based on CSB pin state.
+impl<I2C> Ms5611<I2cInterface<I2C>> {
+    /// Create a new MS5611 sensor driver using I2C with address based on CSB pin state.
     ///   - `csb_high` = true  => 0x76
     ///   - `csb_high` = false => 0x77
     ///
-    /// Note: You must call [`Self::init`]) or [`Self::init_blocking`]) before measurements.
+    /// Note: You must call [`Self::init`] or [`Self::init_blocking`] before measurements.
     pub fn new_i2c(i2c: I2C, csb_high: bool) -> Self {
         Self {
             inner: Ms56xx::new_i2c(i2c, csb_high),
@@ -37,11 +37,11 @@ impl<I2C> Ms5607<I2cInterface<I2C>> {
 }
 
 // Constructors for SPI
-impl<SPI> Ms5607<SpiInterface<SPI>> {
-    /// Create a new MS5607 sensor driver using SPI.
+impl<SPI> Ms5611<SpiInterface<SPI>> {
+    /// Create a new MS5611 sensor driver using SPI.
     ///
     /// Note: CS (chip select) must be handled by the provided `SpiDevice`.
-    /// You must call [`init`](Self::init) or [`init_blocking`](Self::init_blocking) before measurements.
+    /// You must call [`Self::init`] or [`Self::init_blocking`] before measurements.
     pub fn new_spi(spi: SPI) -> Self {
         Self {
             inner: Ms56xx::new_spi(spi),
@@ -55,7 +55,7 @@ impl<SPI> Ms5607<SpiInterface<SPI>> {
 }
 
 // Common methods for all interfaces
-impl<INTERFACE> Ms5607<INTERFACE> {
+impl<INTERFACE> Ms5611<INTERFACE> {
     /// Returns true if the sensor has been initialized successfully.
     pub fn is_initialized(&self) -> bool {
         self.inner.is_initialized()
@@ -63,7 +63,7 @@ impl<INTERFACE> Ms5607<INTERFACE> {
 }
 
 // Async methods for I2C
-impl<I2C: embedded_hal_async::i2c::I2c> Ms5607<I2cInterface<I2C>> {
+impl<I2C: embedded_hal_async::i2c::I2c> Ms5611<I2cInterface<I2C>> {
     /// Send reset command and wait for internal PROM reload (~3ms).
     ///
     /// # Errors
@@ -102,7 +102,7 @@ impl<I2C: embedded_hal_async::i2c::I2c> Ms5607<I2cInterface<I2C>> {
 }
 
 // Blocking methods for I2C
-impl<I2C: embedded_hal::i2c::I2c> Ms5607<I2cInterface<I2C>> {
+impl<I2C: embedded_hal::i2c::I2c> Ms5611<I2cInterface<I2C>> {
     /// Send reset command and wait for internal PROM reload (~3ms).
     ///
     /// This is the blocking version.
@@ -147,7 +147,7 @@ impl<I2C: embedded_hal::i2c::I2c> Ms5607<I2cInterface<I2C>> {
 }
 
 // Async methods for SPI
-impl<SPI: embedded_hal_async::spi::SpiDevice> Ms5607<SpiInterface<SPI>> {
+impl<SPI: embedded_hal_async::spi::SpiDevice> Ms5611<SpiInterface<SPI>> {
     /// Send reset command and wait for internal PROM reload (~3ms).
     ///
     /// # Errors
@@ -186,7 +186,7 @@ impl<SPI: embedded_hal_async::spi::SpiDevice> Ms5607<SpiInterface<SPI>> {
 }
 
 // Blocking methods for SPI
-impl<SPI: embedded_hal::spi::SpiDevice> Ms5607<SpiInterface<SPI>> {
+impl<SPI: embedded_hal::spi::SpiDevice> Ms5611<SpiInterface<SPI>> {
     /// Send reset command and wait for internal PROM reload (~3ms).
     ///
     /// This is the blocking version.

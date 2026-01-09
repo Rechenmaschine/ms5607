@@ -1,4 +1,8 @@
-# ms5637
+# ms5637-rs
+
+[![CI](https://github.com/Rechenmaschine/ms56xx/actions/workflows/rust.yml/badge.svg?branch=main)](https://github.com/Rechenmaschine/ms56xx/actions/workflows/rust.yml)
+[![Docs.rs](https://img.shields.io/docsrs/ms5637-rs?logo=rust)](https://docs.rs/ms5637-rs)
+[![Crates.io](https://img.shields.io/crates/v/ms5637-rs.svg)](https://crates.io/crates/ms5637-rs)
 
 `no_std` driver for the TE Connectivity MS5637 barometric pressure sensor.
 
@@ -14,13 +18,13 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-ms5637 = "0.1"
+ms5637-rs = "0.1"
 ```
 
 ### Example
 
 ```rust
-use ms5637::{Ms5637, Oversampling};
+use ms5637_rs::{Ms5637, Oversampling};
 
 // I2C (fixed address 0x76)
 let mut sensor = Ms5637::new_i2c(i2c);
@@ -43,9 +47,10 @@ println!("Pressure: {} mbar, Temp: {} °C",
 
 ## Related Crates
 
-- [`ms5607`](https://crates.io/crates/ms5607) - Driver for the MS5607 sensor
-- [`ms5611`](https://crates.io/crates/ms5611) - Driver for the MS5611 sensor
+- [`ms5607-rs`](https://crates.io/crates/ms5607-rs) - Driver for the MS5607 sensor
+- [`ms5611-rs`](https://crates.io/crates/ms5611-rs) - Driver for the MS5611 sensor
 
 ## License
 
+MIT or Apache-2.0 license, at your option.
 MIT or Apache-2.0 license, at your option.

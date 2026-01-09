@@ -7,7 +7,7 @@ license.workspace = true
 repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
-description = "no_std driver for MS56xx barometric pressure sensors (MS5607, MS5611)"
+description = "no_std driver for MS56xx barometric pressure sensors (MS5607, MS5611, MS5637)"
 documentation = "https://docs.rs/ms56xx"
 readme = "README.md"
 

@@ -1,5 +1,7 @@
 # MS56xx device drivers
 
+[![CI](https://github.com/Rechenmaschine/ms56xx/actions/workflows/rust.yml/badge.svg?branch=main)](https://github.com/Rechenmaschine/ms56xx/actions/workflows/rust.yml)
+
 > `no_std` drivers for the TE Connectivity MS56xx family of barometric pressure sensors.
 
 - **Supports MS5607, MS5611, and MS5637** sensors
@@ -8,13 +10,13 @@
 - Second-order temperature compensation
 - CRC validation of calibration data
 
-The `ms5607` driver is actively used in several projects at <https://github.com/aris-space> and is deployed on flight hardware.
+The MS56xx drivers are actively used in several projects at <https://github.com/aris-space> and deployed on flight hardware.
 
 ## Crates
 
-- **[`ms5607`](https://crates.io/crates/ms5607)** - Driver for the MS5607 sensor
-- **[`ms5611`](https://crates.io/crates/ms5611)** - Driver for the MS5611 sensor
-- **[`ms5637`](https://crates.io/crates/ms5637)** - Driver for the MS5637 sensor
+- **[`ms5607-rs`](https://crates.io/crates/ms5607-rs)** - Driver for the MS5607 sensor
+- **[`ms5611-rs`](https://crates.io/crates/ms5611-rs)** - Driver for the MS5611 sensor
+- **[`ms5637-rs`](https://crates.io/crates/ms5637-rs)** - Driver for the MS5637 sensor
 
 ## Supported Sensors
 
@@ -22,14 +24,14 @@ The `ms5607` driver is actively used in several projects at <https://github.com/
 - **MS5611-01BA03** - Datasheet: <https://www.te.com/commerce/DocumentDelivery/DDEController?Action=showdoc&DocId=Data+Sheet%7FMS5611-01BA03%7FB3%7Fpdf%7FEnglish%7FENG_DS_MS5611-01BA03_B3.pdf>
 - **MS5637-02BA03** - I2C only, extended oversampling range (256-8192)
 
-Both sensors use the same communication protocol but differ in their temperature compensation algorithms.
+All sensors use the same communication protocol but differ in their temperature compensation algorithms and features.
 
 ## Usage Examples
 
 ### Using the MS5607 crate
 
 ```rust
-use ms5607::{Ms5607, Oversampling};
+use ms5607_rs::{Ms5607, Oversampling};
 
 // I2C (CSB pin high = address 0x76)
 let mut sensor = Ms5607::new_i2c(i2c, true);
@@ -49,7 +51,7 @@ let measurement = sensor.measure_blocking(Oversampling::Osr2048, &mut delay)?;
 ### Using the MS5611 crate
 
 ```rust
-use ms5611::{Ms5611, Oversampling};
+use ms5611_rs::{Ms5611, Oversampling};
 
 // Same API as MS5607
 let mut sensor = Ms5611::new_i2c(i2c, true);
@@ -60,7 +62,7 @@ let measurement = sensor.measure(Oversampling::Osr4096, &mut delay).await?;
 ### Using the MS5637 crate
 
 ```rust
-use ms5637::{Ms5637, Oversampling};
+use ms5637_rs::{Ms5637, Oversampling};
 
 // I2C only, fixed address 0x76
 let mut sensor = Ms5637::new_i2c(i2c);
