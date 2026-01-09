@@ -1,14 +1,18 @@
 #![no_std]
 #![doc = include_str!("../README.md")]
 
+mod interface;
+mod variant;
+
 use core::marker::PhantomData;
 
-use embedded_hal::{
-    delay::DelayNs as BlockingDelay, i2c::I2c as BlockingI2c, spi::SpiDevice as BlockingSpiDevice,
-};
-use embedded_hal_async::{
-    delay::DelayNs as AsyncDelay, i2c::I2c as AsyncI2c, spi::SpiDevice as AsyncSpiDevice,
-};
+use embedded_hal::delay::DelayNs as BlockingDelay;
+use embedded_hal_async::delay::DelayNs as AsyncDelay;
+
+pub use interface::{I2cInterface, Ms56xxInterface, Ms56xxInterfaceAsync, SpiInterface};
+pub use variant::{Ms5607, Ms5611, Ms5637, SensorVariant};
+
+use variant::SupportsSpi;
 
 /// Error type for `MS56xx` operations.
 #[derive(Clone, Copy, Debug)]
@@ -130,319 +134,6 @@ const CMD_PROM_BASE: u8 = 0xA0;
 
 const RESET_DELAY_MS: u32 = 3;
 
-/// Blocking interface operations for `MS56xx` sensors.
-pub trait Ms56xxInterface {
-    type Error;
-
-    /// Write a command byte.
-    ///
-    /// # Errors
-    /// Returns an error if the interface communication fails.
-    fn write_cmd(&mut self, cmd: u8) -> Result<(), Self::Error>;
-
-    /// Write a command byte and read the response.
-    ///
-    /// # Errors
-    /// Returns an error if the interface communication fails.
-    fn read(&mut self, cmd: u8, buf: &mut [u8]) -> Result<(), Self::Error>;
-}
-
-/// Async interface operations for `MS56xx` sensors.
-#[allow(async_fn_in_trait)]
-pub trait Ms56xxInterfaceAsync {
-    type Error;
-
-    /// Write a command byte.
-    ///
-    /// # Errors
-    /// Returns an error if the interface communication fails.
-    async fn write_cmd(&mut self, cmd: u8) -> Result<(), Self::Error>;
-
-    /// Write a command byte and read the response.
-    ///
-    /// # Errors
-    /// Returns an error if the interface communication fails.
-    async fn read(&mut self, cmd: u8, buf: &mut [u8]) -> Result<(), Self::Error>;
-}
-
-/// I2C interface adapter for `MS56xx` sensors.
-pub struct I2cInterface<I2C> {
-    i2c: I2C,
-    addr: u8,
-}
-
-impl<I2C> I2cInterface<I2C> {
-    /// Create a new I2C interface adapter with the given address.
-    pub fn new(i2c: I2C, addr: u8) -> Self {
-        Self { i2c, addr }
-    }
-
-    /// Release the underlying I2C bus.
-    pub fn destroy(self) -> I2C {
-        self.i2c
-    }
-
-    /// Get the configured I2C address.
-    pub fn addr(&self) -> u8 {
-        self.addr
-    }
-}
-
-impl<I2C: BlockingI2c> Ms56xxInterface for I2cInterface<I2C> {
-    type Error = I2C::Error;
-
-    fn write_cmd(&mut self, cmd: u8) -> Result<(), Self::Error> {
-        self.i2c.write(self.addr, &[cmd])
-    }
-
-    fn read(&mut self, cmd: u8, buf: &mut [u8]) -> Result<(), Self::Error> {
-        self.i2c.write_read(self.addr, &[cmd], buf)
-    }
-}
-
-impl<I2C: AsyncI2c> Ms56xxInterfaceAsync for I2cInterface<I2C> {
-    type Error = I2C::Error;
-
-    async fn write_cmd(&mut self, cmd: u8) -> Result<(), Self::Error> {
-        self.i2c.write(self.addr, &[cmd]).await
-    }
-
-    async fn read(&mut self, cmd: u8, buf: &mut [u8]) -> Result<(), Self::Error> {
-        self.i2c.write_read(self.addr, &[cmd], buf).await
-    }
-}
-
-/// SPI interface adapter for `MS56xx` sensors (CS is handled by `SpiDevice`).
-pub struct SpiInterface<SPI> {
-    spi: SPI,
-}
-
-impl<SPI> SpiInterface<SPI> {
-    /// Create a new SPI interface adapter.
-    pub fn new(spi: SPI) -> Self {
-        Self { spi }
-    }
-
-    /// Release the underlying SPI device.
-    pub fn destroy(self) -> SPI {
-        self.spi
-    }
-}
-
-impl<SPI: BlockingSpiDevice> Ms56xxInterface for SpiInterface<SPI> {
-    type Error = SPI::Error;
-
-    fn write_cmd(&mut self, cmd: u8) -> Result<(), Self::Error> {
-        self.spi.write(&[cmd])
-    }
-
-    fn read(&mut self, cmd: u8, buf: &mut [u8]) -> Result<(), Self::Error> {
-        use embedded_hal::spi::Operation;
-        self.spi
-            .transaction(&mut [Operation::Write(&[cmd]), Operation::Read(buf)])
-    }
-}
-
-impl<SPI: AsyncSpiDevice> Ms56xxInterfaceAsync for SpiInterface<SPI> {
-    type Error = SPI::Error;
-
-    async fn write_cmd(&mut self, cmd: u8) -> Result<(), Self::Error> {
-        self.spi.write(&[cmd]).await
-    }
-
-    async fn read(&mut self, cmd: u8, buf: &mut [u8]) -> Result<(), Self::Error> {
-        use embedded_hal_async::spi::Operation;
-        self.spi
-            .transaction(&mut [Operation::Write(&[cmd]), Operation::Read(buf)])
-            .await
-    }
-}
-
-/// Typestate marker for MS5607 sensor.
-pub struct Ms5607;
-/// Typestate marker for MS5611 sensor.
-pub struct Ms5611;
-/// Typestate marker for MS5637 sensor.
-pub struct Ms5637;
-
-/// Compile-time gate for variants that support SPI.
-pub trait SupportsSpi {}
-impl SupportsSpi for Ms5607 {}
-impl SupportsSpi for Ms5611 {}
-
-/// Trait for sensor-variant-specific behavior.
-///
-/// Keep first-order constants here as requested; everything else in this trait is
-/// variant-dependent and used by generic driver code.
-pub trait SensorVariant {
-    /// Oversampling set supported by this sensor.
-    type Oversampling: OversamplingType;
-
-    /// PROM words physically present (MS5607/MS5611: 8, MS5637: 7).
-    const PROM_WORDS: usize;
-
-    /// First-order formula shifts (variant-dependent).
-    const OFF_SHIFT: u32;
-    const OFF_DT_SHIFT: u32;
-    const SENS_SHIFT: u32;
-    const SENS_DT_SHIFT: u32;
-
-    /// 7-bit I2C address selection.
-    fn i2c_address(csb_high: bool) -> u8;
-
-    /// Extract stored CRC nibble from PROM.
-    fn stored_crc(prom: &[u16; 8]) -> u8;
-
-    /// Modify PROM copy for CRC calculation (clear stored CRC bits and any required fields).
-    fn scrub_crc_for_calc(prom: &mut [u16; 8]);
-
-    /// Apply second-order temperature compensation.
-    fn second_order(temp: i64, dt: i64) -> (i64, i64, i64); // (t2, off2, sens2)
-}
-
-impl SensorVariant for Ms5607 {
-    type Oversampling = OversamplingStandard;
-
-    const PROM_WORDS: usize = 8;
-
-    const OFF_SHIFT: u32 = 17;
-    const OFF_DT_SHIFT: u32 = 6;
-    const SENS_SHIFT: u32 = 16;
-    const SENS_DT_SHIFT: u32 = 7;
-
-    fn i2c_address(csb_high: bool) -> u8 {
-        if csb_high { 0x76 } else { 0x77 }
-    }
-
-    fn stored_crc(prom: &[u16; 8]) -> u8 {
-        (prom[7] & 0x000F) as u8
-    }
-
-    fn scrub_crc_for_calc(prom: &mut [u16; 8]) {
-        // Typical AN520/MS56xx CRC prep: clear CRC nibble in word 7 low bits.
-        prom[7] &= 0xFF00;
-    }
-
-    fn second_order(temp: i64, dt: i64) -> (i64, i64, i64) {
-        let mut t2 = 0i64;
-        let mut off2 = 0i64;
-        let mut sens2 = 0i64;
-
-        if temp < 2000 {
-            let t_low = temp - 2000;
-            t2 = (dt * dt) >> 31;
-            off2 = (61 * t_low * t_low) >> 4;
-            sens2 = 2 * t_low * t_low;
-
-            if temp < -1500 {
-                let tvl = temp + 1500;
-                off2 += 15 * tvl * tvl;
-                sens2 += 8 * tvl * tvl;
-            }
-        }
-
-        (t2, off2, sens2)
-    }
-}
-
-impl SensorVariant for Ms5611 {
-    type Oversampling = OversamplingStandard;
-
-    const PROM_WORDS: usize = 8;
-
-    // MS5611 differs from MS5607 here.
-    const OFF_SHIFT: u32 = 16;
-    const OFF_DT_SHIFT: u32 = 7;
-    const SENS_SHIFT: u32 = 15;
-    const SENS_DT_SHIFT: u32 = 8;
-
-    fn i2c_address(csb_high: bool) -> u8 {
-        if csb_high { 0x76 } else { 0x77 }
-    }
-
-    fn stored_crc(prom: &[u16; 8]) -> u8 {
-        (prom[7] & 0x000F) as u8
-    }
-
-    fn scrub_crc_for_calc(prom: &mut [u16; 8]) {
-        prom[7] &= 0xFF00;
-    }
-
-    fn second_order(temp: i64, dt: i64) -> (i64, i64, i64) {
-        let t2;
-        let mut off2 = 0i64;
-        let mut sens2 = 0i64;
-
-        if temp < 2000 {
-            let t_low = temp - 2000;
-            t2 = (dt * dt) >> 31;
-            off2 = (5 * t_low * t_low) >> 1;
-            sens2 = (5 * t_low * t_low) >> 2;
-
-            if temp < -1500 {
-                let tvl = temp + 1500;
-                off2 += 7 * tvl * tvl;
-                sens2 += (11 * tvl * tvl) >> 1;
-            }
-        } else {
-            t2 = 0;
-        }
-
-        (t2, off2, sens2)
-    }
-}
-
-impl SensorVariant for Ms5637 {
-    type Oversampling = OversamplingExtended;
-
-    // 112-bit PROM => 7 words.
-    const PROM_WORDS: usize = 7;
-
-    // MS5637 uses the MS5607-style first-order shifts.
-    const OFF_SHIFT: u32 = 17;
-    const OFF_DT_SHIFT: u32 = 6;
-    const SENS_SHIFT: u32 = 16;
-    const SENS_DT_SHIFT: u32 = 7;
-
-    fn i2c_address(_csb_high: bool) -> u8 {
-        // Fixed 7-bit address.
-        0x76
-    }
-
-    fn stored_crc(prom: &[u16; 8]) -> u8 {
-        ((prom[0] >> 12) & 0x000F) as u8
-    }
-
-    fn scrub_crc_for_calc(prom: &mut [u16; 8]) {
-        // MS5637 datasheet CRC reference: clear CRC nibble in word0 and set word7=0.
-        prom[0] &= 0x0FFF;
-        prom[7] = 0;
-    }
-
-    fn second_order(temp: i64, dt: i64) -> (i64, i64, i64) {
-        let t2;
-        let mut off2 = 0i64;
-        let mut sens2 = 0i64;
-
-        if temp < 2000 {
-            let t_low = temp - 2000;
-            t2 = (3 * dt * dt) >> 33;
-            off2 = (61 * t_low * t_low) >> 4;
-            sens2 = (29 * t_low * t_low) >> 4;
-
-            if temp < -1500 {
-                let tvl = temp + 1500;
-                off2 += 17 * tvl * tvl;
-                sens2 += 9 * tvl * tvl;
-            }
-        } else {
-            t2 = (5 * dt * dt) >> 38;
-        }
-
-        (t2, off2, sens2)
-    }
-}
-
 /// A driver for `MS56xx` pressure sensors (MS5607, MS5611, MS5637).
 pub struct Ms56xx<INTERFACE, VARIANT: SensorVariant> {
     interface: INTERFACE,
@@ -476,10 +167,9 @@ impl<I2C, VARIANT: SensorVariant> Ms56xx<I2cInterface<I2C>, VARIANT> {
     }
 }
 
+#[allow(private_bounds)]
 impl<SPI, VARIANT: SensorVariant + SupportsSpi> Ms56xx<SpiInterface<SPI>, VARIANT> {
     /// Create a new sensor driver using SPI.
-    ///
-    /// Only available for variants that support SPI (compile-time gated).
     pub fn new_spi(spi: SPI) -> Self {
         Self {
             interface: SpiInterface::new(spi),
